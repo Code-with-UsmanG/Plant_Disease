@@ -1,7 +1,7 @@
 // ─── Configuration ───────────────────────────────────────────────────────────
 // ⚠️ UPDATE THIS after deploying to Hugging Face Spaces
 // It will be something like: https://your-username-plant-disease.hf.space
-const API_URL = "http://localhost:7860";
+const API_URL = "https://usmang-plant-disease-detection.hf.space";
 
 // ─── DOM Elements ────────────────────────────────────────────────────────────
 const uploadSection = document.getElementById("upload-section");
