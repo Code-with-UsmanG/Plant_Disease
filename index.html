@@ -1,185 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlantGuard AI — Plant Disease Detection</title>
-    <meta name="description" content="Upload a plant leaf image and receive a polished, confidence-backed diagnosis with a beautiful, modern experience.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="ambient ambient-one"></div>
-    <div class="ambient ambient-two"></div>
-
-    <div class="page-shell">
-        <header class="topbar">
-            <a class="brand" href="#">
-                <span class="brand-mark">✿</span>
-                <span class="brand-copy">
-                    <strong>PlantGuard</strong>
-                    <small>AI plant care studio</small>
-                </span>
-            </a>
-            <div class="topbar-actions">
-                <span class="pill">Live AI analysis</span>
-                <span class="pill pill-muted">38 disease classes</span>
-            </div>
-        </header>
-
-        <main class="main-content">
-            <section class="hero-panel">
-                <div class="hero-copy">
-                    <p class="eyebrow">Plant disease intelligence</p>
-                    <h1>Spot plant stress in seconds, with clarity.</h1>
-                    <p class="hero-text">Upload a leaf photo and receive a polished, confidence-backed diagnosis that helps you act quickly and care better.</p>
-                    <div class="hero-actions">
-                        <a class="button primary" href="#upload-section">Scan a leaf</a>
-                        <div class="hero-metrics">
-                            <span>Instant scan</span>
-                            <span>Top-3 predictions</span>
-                            <span>Visual review</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hero-visual">
-                    <div class="visual-card">
-                        <div class="visual-header">
-                            <span class="dot"></span>
-                            <span class="dot"></span>
-                            <span class="dot"></span>
-                        </div>
-                        <div class="visual-grid">
-                            <div class="visual-tile large">
-                                <div class="tile-badge">Leaf scan</div>
-                                <div class="leaf-ring">🌿</div>
-                            </div>
-                            <div class="visual-tile compact">
-                                <div class="tile-kicker">Confidence</div>
-                                <strong>94.8%</strong>
-                                <span>Healthy leaf pattern</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="upload-section" id="upload-section">
-                <div class="upload-card">
-                    <div class="upload-head">
-                        <div>
-                            <p class="eyebrow">Upload image</p>
-                            <h2>Drop in a leaf photo</h2>
-                        </div>
-                        <span class="pill success">Fast • private • accurate</span>
-                    </div>
-
-                    <label class="dropzone" id="upload-area">
-                        <input type="file" id="file-input" accept="image/*" hidden>
-
-                        <div class="dropzone-content" id="upload-prompt">
-                            <div class="dropzone-icon">
-                                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="8" y="8" width="48" height="48" rx="12" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/>
-                                    <path d="M32 22V42M22 32H42" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                                </svg>
-                            </div>
-                            <h3>Choose a photo or drag it here</h3>
-                            <p>JPG, PNG, WebP or TIFF up to 10 MB.</p>
-                            <span class="browse-link" id="browse-btn">Browse files</span>
-                        </div>
-
-                        <div class="preview-shell" id="upload-preview" hidden>
-                            <img id="preview-image" alt="Uploaded leaf preview">
-                            <div class="preview-overlay">
-                                <button class="preview-change" id="change-btn" type="button">Replace image</button>
-                            </div>
-                        </div>
-                    </label>
-
-                    <div class="upload-footer">
-                        <button class="button primary wide" id="analyze-btn" disabled type="button">Analyze now</button>
-                        <p class="helper-text">The scanned image stays visible in the results so you can compare it with the diagnosis.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="loading-section" id="loading-section" hidden>
-                <div class="loading-card">
-                    <div class="loader-ring">
-                        <div class="loader-core">🌿</div>
-                    </div>
-                    <h3>Scanning the leaf pattern</h3>
-                    <p>Our AI is evaluating texture, color, and overall plant health.</p>
-                </div>
-            </section>
-
-            <section class="results-section" id="results-section" hidden>
-                <div class="results-card">
-                    <div class="results-grid">
-                        <div class="result-preview">
-                            <img id="result-image" alt="Analyzed plant preview">
-                        </div>
-                        <div class="result-details">
-                            <div class="result-badges">
-                                <span class="status-pill" id="status-pill">Healthy</span>
-                                <span class="pill pill-muted" id="risk-pill">Low risk</span>
-                            </div>
-                            <h2 id="result-plant-name">—</h2>
-                            <p class="result-condition" id="result-condition">—</p>
-
-                            <div class="confidence-card">
-                                <div class="confidence-head">
-                                    <span>Model confidence</span>
-                                    <strong id="confidence-value">—</strong>
-                                </div>
-                                <div class="confidence-track">
-                                    <div class="confidence-fill" id="confidence-bar-fill"></div>
-                                </div>
-                            </div>
-
-                            <div class="insight-card">
-                                <h3>Analysis summary</h3>
-                                <p id="analysis-summary">—</p>
-                            </div>
-
-                            <div class="insight-card">
-                                <h3>Suggested next step</h3>
-                                <p id="analysis-advice">—</p>
-                            </div>
-
-                            <div class="top3-card">
-                                <div class="top3-head">
-                                    <h3>Top predictions</h3>
-                                    <span>Ranked by confidence</span>
-                                </div>
-                                <div class="top3-list" id="top3-list"></div>
-                            </div>
-
-                            <button class="button secondary" id="try-again-btn" type="button">Analyze another image</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="error-section" id="error-section" hidden>
-                <div class="error-card">
-                    <div class="error-icon">⚠️</div>
-                    <h3>Something went wrong</h3>
-                    <p id="error-message">We could not analyze that image. Please try again.</p>
-                    <button class="button primary" id="error-retry-btn" type="button">Try again</button>
-                </div>
-            </section>
-        </main>
-
-        <footer class="footer">
-            <p>Built for growers, gardeners, and curious plant lovers.</p>
-        </footer>
-    </div>
-
-    <script src="script.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PlantGuard — Plant Disease Diagnostics</title>
+    <meta name="description" content="A diagnostic instrument for plant leaf health. Upload a specimen photo and receive a lab-grade, confidence-scored disease reading." />
+    <link rel="icon" type="image/svg+xml" href="/leaf-mark.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
