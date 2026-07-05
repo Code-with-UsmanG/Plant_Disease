@@ -1,6 +1,4 @@
 // ─── Configuration ───────────────────────────────────────────────────────────
-// ⚠️ UPDATE THIS after deploying to Hugging Face Spaces
-// It will be something like: https://your-username-plant-disease.hf.space
 const API_URL = "https://usmang-plant-disease-detection.hf.space";
 
 // ─── DOM Elements ────────────────────────────────────────────────────────────
@@ -18,23 +16,24 @@ const loadingSection = document.getElementById("loading-section");
 const resultsSection = document.getElementById("results-section");
 const errorSection = document.getElementById("error-section");
 
-const resultStatusIcon = document.getElementById("result-status-icon");
+const resultImage = document.getElementById("result-image");
 const resultPlantName = document.getElementById("result-plant-name");
 const resultCondition = document.getElementById("result-condition");
 const confidenceValue = document.getElementById("confidence-value");
 const confidenceBarFill = document.getElementById("confidence-bar-fill");
 const top3List = document.getElementById("top3-list");
 const errorMessage = document.getElementById("error-message");
+const statusPill = document.getElementById("status-pill");
+const riskPill = document.getElementById("risk-pill");
+const analysisSummary = document.getElementById("analysis-summary");
+const analysisAdvice = document.getElementById("analysis-advice");
 
 const tryAgainBtn = document.getElementById("try-again-btn");
 const errorRetryBtn = document.getElementById("error-retry-btn");
 
-// ─── State ───────────────────────────────────────────────────────────────────
 let selectedFile = null;
+let currentPreviewUrl = "";
 
-// ─── Upload Handling ─────────────────────────────────────────────────────────
-
-// Click to browse
 browseBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     fileInput.click();
@@ -44,21 +43,18 @@ uploadArea.addEventListener("click", () => {
     if (!selectedFile) fileInput.click();
 });
 
-// File selected via input
 fileInput.addEventListener("change", (e) => {
     if (e.target.files.length > 0) {
         handleFile(e.target.files[0]);
     }
 });
 
-// Change button
 changeBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     resetUpload();
     fileInput.click();
 });
 
-// Drag and drop
 uploadArea.addEventListener("dragover", (e) => {
     e.preventDefault();
     uploadArea.classList.add("drag-over");
@@ -78,14 +74,12 @@ uploadArea.addEventListener("drop", (e) => {
 });
 
 function handleFile(file) {
-    // Validate type
     const validTypes = ["image/jpeg", "image/png", "image/webp", "image/bmp", "image/tiff"];
     if (!validTypes.includes(file.type)) {
         showError("Please upload a valid image file (JPG, PNG, WebP, BMP, or TIFF).");
         return;
     }
 
-    // Validate size (10 MB)
     if (file.size > 10 * 1024 * 1024) {
         showError(`File is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum size is 10 MB.`);
         return;
@@ -93,10 +87,16 @@ function handleFile(file) {
 
     selectedFile = file;
 
-    // Show preview
+    if (currentPreviewUrl) {
+        URL.revokeObjectURL(currentPreviewUrl);
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
-        previewImage.src = e.target.result;
+        const dataUrl = e.target.result;
+        previewImage.src = dataUrl;
+        resultImage.src = dataUrl;
+        currentPreviewUrl = dataUrl;
         uploadPrompt.hidden = true;
         uploadPreview.hidden = false;
         analyzeBtn.disabled = false;
@@ -108,17 +108,15 @@ function resetUpload() {
     selectedFile = null;
     fileInput.value = "";
     previewImage.src = "";
+    resultImage.src = "";
     uploadPrompt.hidden = false;
     uploadPreview.hidden = true;
     analyzeBtn.disabled = true;
 }
 
-// ─── Analyze ─────────────────────────────────────────────────────────────────
-
 analyzeBtn.addEventListener("click", async () => {
     if (!selectedFile) return;
 
-    // Show loading, hide others
     showView("loading");
 
     const formData = new FormData();
@@ -149,24 +147,29 @@ analyzeBtn.addEventListener("click", async () => {
     }
 });
 
-// ─── Display Results ─────────────────────────────────────────────────────────
-
 function displayResults(data) {
-    // Status icon & header
     const isHealthy = data.is_healthy;
-    resultStatusIcon.textContent = isHealthy ? "✅" : "🔴";
+
     resultPlantName.textContent = data.plant;
+    resultCondition.textContent = isHealthy ? "Healthy leaf appearance" : data.condition;
+    resultCondition.className = `result-condition ${isHealthy ? "healthy" : "diseased"}`;
 
-    const conditionEl = resultCondition;
-    conditionEl.textContent = isHealthy ? "Healthy" : data.condition;
-    conditionEl.className = `result-condition ${isHealthy ? "healthy" : "diseased"}`;
+    statusPill.textContent = isHealthy ? "Healthy" : "Needs attention";
+    statusPill.className = `status-pill ${isHealthy ? "" : "danger"}`;
+    riskPill.textContent = isHealthy ? "Low risk" : "Medium risk";
 
-    // Confidence
-    const conf = data.confidence;
+    const conf = Math.round(data.confidence || 0);
     confidenceValue.textContent = `${conf}%`;
     confidenceBarFill.style.width = "0%";
 
-    // Top 3
+    analysisSummary.textContent = isHealthy
+        ? `${data.plant} appears to be in a healthy state based on the uploaded image.`
+        : `${data.plant} shows signs consistent with ${data.condition.toLowerCase()}.`;
+
+    analysisAdvice.textContent = isHealthy
+        ? "Keep the plant well-watered, monitor for pests, and continue regular care."
+        : "Inspect the leaf closely, remove affected tissue if needed, and consider targeted treatment or expert guidance.";
+
     top3List.innerHTML = "";
     if (data.top_3 && data.top_3.length > 0) {
         data.top_3.forEach((item, i) => {
@@ -186,15 +189,12 @@ function displayResults(data) {
 
     showView("results");
 
-    // Animate confidence bar after section is visible
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             confidenceBarFill.style.width = `${conf}%`;
         });
     });
 }
-
-// ─── View Management ─────────────────────────────────────────────────────────
 
 function showView(view) {
     uploadSection.hidden = view !== "upload";
@@ -207,8 +207,6 @@ function showError(msg) {
     errorMessage.textContent = msg || "Something went wrong. Please try again.";
     showView("error");
 }
-
-// ─── Reset / Try Again ───────────────────────────────────────────────────────
 
 function goBackToUpload() {
     resetUpload();
